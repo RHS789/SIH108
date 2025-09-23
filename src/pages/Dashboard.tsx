@@ -3,10 +3,10 @@ import { motion } from "framer-motion";
 import AOS from "aos";
 import "aos/dist/aos.css";
 
-import { 
-  Users, 
-  Calendar, 
-  AlertCircle, 
+import {
+  Users,
+  Calendar,
+  AlertCircle,
   Gift,
   Shield,
   Building,
@@ -19,17 +19,25 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import templeHero from "@/assets/temple-hero.jpg";
+import { useQuery } from "@tanstack/react-query";
+import { fetchRealtimeMetrics } from "@/lib/api";
 
 export default function Dashboard() {
   useEffect(() => {
     AOS.init({ duration: 800, once: true });
   }, []);
 
+  const { data: metrics } = useQuery({
+    queryKey: ["realtime-metrics"],
+    queryFn: ({ signal }) => fetchRealtimeMetrics(signal),
+    refetchInterval: 10000,
+  });
+
   const stats = [
     {
       title: "Active Pilgrims",
-      value: "2,847",
-      change: "+12% from yesterday",
+      value: metrics ? metrics.active_pilgrims.toLocaleString() : "–",
+      change: metrics ? "Live" : "Waiting...",
       changeType: "positive" as const,
       icon: <Users className="w-5 h-5 animate-pulse text-gold-400" />,
       description: "Currently in temple",
@@ -37,8 +45,8 @@ export default function Dashboard() {
     },
     {
       title: "Today's Offerings",
-      value: "₹1,24,890",
-      change: "+8% from yesterday",  
+      value: metrics ? `₹${metrics.todays_offerings_inr.toLocaleString()}` : "–",
+      change: metrics ? "Updating" : "Waiting...",
       changeType: "positive" as const,
       icon: <Gift className="w-5 h-5 animate-bounce text-gold-400" />,
       description: "Donations received",
@@ -46,16 +54,16 @@ export default function Dashboard() {
     },
     {
       title: "Queue Wait Time",
-      value: "23 min",
-      change: "-5 min from avg",
+      value: metrics ? `${metrics.queue_wait_time_min} min` : "–",
+      change: "Refreshed every 10s",
       changeType: "positive" as const,
       icon: <Users className="w-5 h-5" />,
       description: "Average wait time",
     },
     {
-      title: "Events Today", 
-      value: "7",
-      change: "3 upcoming",
+      title: "Events Today",
+      value: metrics ? `${metrics.events_today}` : "–",
+      change: "Schedule",
       changeType: "neutral" as const,
       icon: <Calendar className="w-5 h-5" />,
       description: "Sacred ceremonies",
@@ -90,14 +98,14 @@ export default function Dashboard() {
       />
 
       {/* Hero Section */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: -40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
         className="relative h-52 rounded-xl overflow-hidden sacred-glow shadow-sacred"
       >
-        <img 
-          src={templeHero} 
+        <img
+          src={templeHero}
           alt="Sacred Temple"
           className="w-full h-full object-cover"
         />
@@ -109,18 +117,18 @@ export default function Dashboard() {
             Divine management for spiritual harmony
           </p>
           <p className="text-sm mt-2 text-primary-foreground/75">
-            {new Date().toLocaleDateString("en-IN", { 
-              weekday: "long", 
-              year: "numeric", 
-              month: "long", 
-              day: "numeric" 
+            {new Date().toLocaleDateString("en-IN", {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric"
             })}
           </p>
         </div>
       </motion.div>
 
       {/* Stats Grid */}
-      <div 
+      <div
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
         data-aos="fade-up"
       >
@@ -139,7 +147,7 @@ export default function Dashboard() {
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent Alerts */}
-        <Card 
+        <Card
           className="lg:col-span-2 bg-card/80 backdrop-blur-sm border-gold-400 border-2 hover:shadow-sacred transition-all duration-300"
           data-aos="fade-right"
         >
@@ -155,8 +163,8 @@ export default function Dashboard() {
           <CardContent>
             <div className="space-y-4">
               {recentAlerts.map((alert, i) => (
-                <motion.div 
-                  key={alert.id} 
+                <motion.div
+                  key={alert.id}
                   initial={{ opacity: 0, x: -30 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   transition={{ delay: i * 0.15 }}
@@ -164,12 +172,12 @@ export default function Dashboard() {
                   className="flex items-center justify-between p-3 rounded-lg bg-background/50 hover:bg-background/80 shadow-inner transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <Badge 
+                    <Badge
                       variant={
-                        alert.type === "warning" 
-                          ? "destructive" 
-                          : alert.type === "success" 
-                            ? "default" 
+                        alert.type === "warning"
+                          ? "destructive"
+                          : alert.type === "success"
+                            ? "default"
                             : "secondary"
                       }
                       className="w-2 h-2 p-0 rounded-full"
@@ -187,7 +195,7 @@ export default function Dashboard() {
         </Card>
 
         {/* Upcoming Events */}
-        <Card 
+        <Card
           className="bg-card/80 backdrop-blur-sm border-gold-400 border-2 hover:shadow-sacred transition-all duration-300"
           data-aos="fade-left"
         >
@@ -203,8 +211,8 @@ export default function Dashboard() {
           <CardContent>
             <div className="space-y-4">
               {upcomingEvents.map((event, i) => (
-                <motion.div 
-                  key={event.id} 
+                <motion.div
+                  key={event.id}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.2 }}
@@ -232,7 +240,7 @@ export default function Dashboard() {
       </div>
 
       {/* Quick Actions */}
-      <Card 
+      <Card
         className="bg-card/80 backdrop-blur-sm border-gold-400 border-2 hover:shadow-sacred transition-all duration-300"
         data-aos="zoom-in-up"
       >
