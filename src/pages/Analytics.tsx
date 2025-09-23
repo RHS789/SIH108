@@ -23,6 +23,17 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
+import { useQuery } from "@tanstack/react-query";
+import { fetchCrowdForecast } from "@/lib/api";
+import {
+  ResponsiveContainer,
+  LineChart,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Line,
+} from "recharts";
 
 export default function Analytics() {
   const [selectedPeriod, setSelectedPeriod] = useState("week");
@@ -33,6 +44,12 @@ export default function Analytics() {
     { period: "This Week", visitors: 18956, growth: 15, revenue: 947800 },
     { period: "This Month", visitors: 76234, growth: 22, revenue: 3811700 }
   ];
+
+  const { data: forecast } = useQuery({
+    queryKey: ["crowd-forecast", selectedPeriod],
+    queryFn: ({ signal }) => fetchCrowdForecast(48, signal),
+    staleTime: 30_000,
+  });
 
   const queueMetrics = [
     { metric: "Average Wait Time", value: "18 min", change: "-12%", trend: "down" },
@@ -124,12 +141,28 @@ export default function Analytics() {
                 <CardDescription>Visitor patterns over time</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-64 bg-muted/30 rounded-lg flex items-center justify-center border-2 border-dashed border-border">
-                  <div className="text-center">
-                    <TrendingUp className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground">Daily visitor trend chart</p>
-                    <p className="text-sm text-muted-foreground mt-2">Line graph showing visitor patterns</p>
-                  </div>
+                <div className="h-64">
+                  {forecast && forecast.length > 0 ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={forecast.map(p => ({
+                        t: new Date(p.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+                        y: p.predicted_pilgrims,
+                      }))}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="t" minTickGap={24} />
+                        <YAxis />
+                        <Tooltip />
+                        <Line type="monotone" dataKey="y" stroke="#f59e0b" strokeWidth={2} dot={false} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="h-full bg-muted/30 rounded-lg flex items-center justify-center border-2 border-dashed border-border">
+                      <div className="text-center">
+                        <TrendingUp className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                        <p className="text-muted-foreground">Fetching forecast…</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
