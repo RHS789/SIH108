@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { 
   FileText, 
   Download, 
@@ -16,6 +16,23 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  ResponsiveContainer,
+  LineChart,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  Line,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  AreaChart,
+  Area,
+} from "recharts";
 
 export default function Reports() {
   const [selectedPeriod, setSelectedPeriod] = useState("week");
@@ -154,6 +171,48 @@ export default function Reports() {
   const getTrendColor = (trend: string) => {
     return trend === "up" ? "text-accent" : "text-orange-500";
   };
+
+  const bookingTrendData = useMemo(
+    () => Array.from({ length: 12 }, (_, i) => ({ m: i + 1, bookings: Math.floor(15000 + Math.random() * 20000) })),
+    []
+  );
+
+  const geoData = useMemo(
+    () => [
+      { name: "Local", value: Math.floor(40 + Math.random() * 20) },
+      { name: "Regional", value: Math.floor(20 + Math.random() * 20) },
+      { name: "National", value: Math.floor(10 + Math.random() * 15) },
+      { name: "International", value: Math.floor(5 + Math.random() * 10) },
+    ],
+    []
+  );
+
+  const behaviorData = useMemo(
+    () => Array.from({ length: 24 }, (_, h) => ({ h: `${h}:00`, dwell: Math.floor(1 + Math.random() * 5) })),
+    []
+  );
+
+  const waitTimeData = useMemo(
+    () => Array.from({ length: 24 }, (_, h) => ({ h: `${h}:00`, min: Math.floor(5 + Math.random() * 30) })),
+    []
+  );
+
+  const efficiencyData = useMemo(
+    () => [
+      { k: "Flow", v: Math.floor(70 + Math.random() * 25) },
+      { k: "Staff", v: Math.floor(60 + Math.random() * 30) },
+      { k: "Infra", v: Math.floor(55 + Math.random() * 35) },
+      { k: "Comm", v: Math.floor(65 + Math.random() * 25) },
+    ],
+    []
+  );
+
+  const incidentTimeline = useMemo(
+    () => Array.from({ length: 14 }, (_, d) => ({ d: `D${d + 1}`, cnt: Math.floor(Math.random() * 12) })),
+    []
+  );
+
+  const COLORS = ["#10b981", "#3b82f6", "#f59e0b", "#ef4444"]; 
 
   return (
     <div className="space-y-6">
@@ -312,12 +371,16 @@ export default function Reports() {
               <CardDescription>Visual representation of booking patterns over time</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-64 bg-muted/30 rounded-lg flex items-center justify-center border-2 border-dashed border-border">
-                <div className="text-center">
-                  <BarChart3 className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">Booking trends and seasonal patterns</p>
-                  <p className="text-sm text-muted-foreground mt-2">Interactive chart showing daily/weekly/monthly booking data</p>
-                </div>
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={bookingTrendData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="m" />
+                    <YAxis />
+                    <Tooltip />
+                    <Line type="monotone" dataKey="bookings" stroke="#f59e0b" strokeWidth={2} dot={false} />
+                  </LineChart>
+                </ResponsiveContainer>
               </div>
             </CardContent>
           </Card>
@@ -357,12 +420,18 @@ export default function Reports() {
                 <CardDescription>Visitor origins and travel patterns</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-64 bg-muted/30 rounded-lg flex items-center justify-center border-2 border-dashed border-border">
-                  <div className="text-center">
-                    <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground">Geographic visitor distribution</p>
-                    <p className="text-sm text-muted-foreground mt-2">Map showing visitor origins and patterns</p>
-                  </div>
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Tooltip />
+                      <Legend />
+                      <Pie data={geoData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={90} label>
+                        {geoData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                    </PieChart>
+                  </ResponsiveContainer>
                 </div>
               </CardContent>
             </Card>
@@ -374,11 +443,22 @@ export default function Reports() {
               <CardDescription>Visit patterns, preferences, and engagement metrics</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-48 bg-muted/30 rounded-lg flex items-center justify-center border-2 border-dashed border-border">
-                <div className="text-center">
-                  <TrendingUp className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">Visitor behavior and engagement analysis</p>
-                </div>
+              <div className="h-48">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={behaviorData}>
+                    <defs>
+                      <linearGradient id="gradBeh" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8} />
+                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.1} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="h" />
+                    <YAxis />
+                    <Tooltip />
+                    <Area type="monotone" dataKey="dwell" stroke="#3b82f6" fillOpacity={1} fill="url(#gradBeh)" />
+                  </AreaChart>
+                </ResponsiveContainer>
               </div>
             </CardContent>
           </Card>
@@ -414,11 +494,16 @@ export default function Reports() {
                 <CardDescription>Historical queue performance analysis</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-48 bg-muted/30 rounded-lg flex items-center justify-center border-2 border-dashed border-border">
-                  <div className="text-center">
-                    <Clock className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground">Queue wait time trend analysis</p>
-                  </div>
+                <div className="h-48">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={waitTimeData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="h" minTickGap={12} />
+                      <YAxis />
+                      <Tooltip />
+                      <Line type="monotone" dataKey="min" stroke="#ef4444" strokeWidth={2} dot={false} />
+                    </LineChart>
+                  </ResponsiveContainer>
                 </div>
               </CardContent>
             </Card>
@@ -429,11 +514,16 @@ export default function Reports() {
                 <CardDescription>Queue throughput and optimization insights</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-48 bg-muted/30 rounded-lg flex items-center justify-center border-2 border-dashed border-border">
-                  <div className="text-center">
-                    <BarChart3 className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground">Queue efficiency metrics</p>
-                  </div>
+                <div className="h-48">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={efficiencyData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="k" />
+                      <YAxis />
+                      <Tooltip />
+                      <Bar dataKey="v" fill="#10b981" radius={[4,4,0,0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
                 </div>
               </CardContent>
             </Card>
@@ -478,11 +568,22 @@ export default function Reports() {
               <CardDescription>Resolution patterns and response time analysis</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-48 bg-muted/30 rounded-lg flex items-center justify-center border-2 border-dashed border-border">
-                <div className="text-center">
-                  <AlertCircle className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">Incident response timeline and analysis</p>
-                </div>
+              <div className="h-48">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={incidentTimeline}>
+                    <defs>
+                      <linearGradient id="gradInc" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#f472b6" stopOpacity={0.8} />
+                        <stop offset="95%" stopColor="#f472b6" stopOpacity={0.1} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="d" />
+                    <YAxis />
+                    <Tooltip />
+                    <Area type="monotone" dataKey="cnt" stroke="#f472b6" fillOpacity={1} fill="url(#gradInc)" />
+                  </AreaChart>
+                </ResponsiveContainer>
               </div>
             </CardContent>
           </Card>
