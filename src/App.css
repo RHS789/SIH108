@@ -1,0 +1,63 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+  background-color: #000; /* dark temple background */
+  color: #fef3c7; /* soft amber text */
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms, transform 300ms;
+}
+
+.logo:hover {
+  filter: drop-shadow(0 0 1.5em #f59e0b); /* amber glow */
+  transform: scale(1.05);
+}
+
+.logo.react:hover {
+  filter: drop-shadow(0 0 1.5em #fbbf24); /* brighter amber glow */
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+  border-radius: 1rem;
+  background: rgba(120, 53, 15, 0.9); /* amber-800 glassy */
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+  transition: transform 250ms ease, box-shadow 250ms ease;
+}
+
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 30px rgba(245, 158, 11, 0.4); /* glowing amber */
+}
+
+.read-the-docs {
+  color: #fbbf24; /* soft amber */
+  font-size: 0.9rem;
+  opacity: 0.8;
+  transition: opacity 200ms ease;
+}
+
+.read-the-docs:hover {
+  opacity: 1;
+}
