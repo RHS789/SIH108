@@ -62,11 +62,8 @@ export function TopNavLayout({ children }: TopNavLayoutProps) {
               </div>
               <div className="flex flex-col">
                 <h1 className="font-teko text-lg sm:text-xl font-bold text-primary leading-none">
-                  Sacred Temple Admin
+                  Temple Admin
                 </h1>
-                <p className="hidden sm:block text-xs text-muted-foreground leading-none">
-                  Divine Management Dashboard
-                </p>
               </div>
             </motion.div>
 
