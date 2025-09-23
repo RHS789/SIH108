@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   BarChart3,
   TrendingUp,
@@ -33,6 +33,10 @@ import {
   YAxis,
   Tooltip,
   Line,
+  BarChart,
+  Bar,
+  AreaChart,
+  Area,
 } from "recharts";
 
 export default function Analytics() {
@@ -50,6 +54,50 @@ export default function Analytics() {
     queryFn: ({ signal }) => fetchCrowdForecast(48, signal),
     staleTime: 30_000,
   });
+
+  const seasonalData = useMemo(
+    () =>
+      ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"].map((m) => ({
+        m,
+        v: Math.floor(2000 + Math.random() * 5000),
+      })),
+    []
+  );
+
+  const hourlyData = useMemo(
+    () => Array.from({ length: 24 }, (_, h) => ({ h: `${h}:00`, v: Math.floor(200 + Math.random() * 900) })),
+    []
+  );
+
+  const queuePerfData = useMemo(
+    () => Array.from({ length: 20 }, (_, i) => ({ t: `D${i + 1}`, v: Math.floor(1500 + Math.random() * 2500) })),
+    []
+  );
+
+  const dropOffData = useMemo(
+    () => [
+      { stage: "Arrival", v: Math.floor(95 + Math.random() * 5) },
+      { stage: "Queue", v: Math.floor(85 + Math.random() * 10) },
+      { stage: "Pre-entry", v: Math.floor(80 + Math.random() * 8) },
+      { stage: "Darshan", v: Math.floor(78 + Math.random() * 6) },
+    ],
+    []
+  );
+
+  const revenueTrend = useMemo(
+    () => Array.from({ length: 12 }, (_, i) => ({ m: i + 1, v: Math.floor(200000 + Math.random() * 300000) })),
+    []
+  );
+
+  const donationData = useMemo(
+    () => [
+      { src: "Tickets", v: Math.floor(400000 + Math.random() * 200000) },
+      { src: "VIP", v: Math.floor(250000 + Math.random() * 150000) },
+      { src: "Donations", v: Math.floor(200000 + Math.random() * 200000) },
+      { src: "Prasadam", v: Math.floor(80000 + Math.random() * 100000) },
+    ],
+    []
+  );
 
   const queueMetrics = [
     { metric: "Average Wait Time", value: "18 min", change: "-12%", trend: "down" },
@@ -173,12 +221,22 @@ export default function Analytics() {
                 <CardDescription>Festival and seasonal visitor patterns</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-64 bg-muted/30 rounded-lg flex items-center justify-center border-2 border-dashed border-border">
-                  <div className="text-center">
-                    <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground">Seasonal visitor analysis</p>
-                    <p className="text-sm text-muted-foreground mt-2">Festival impact on visitor numbers</p>
-                  </div>
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={seasonalData}>
+                      <defs>
+                        <linearGradient id="gradSeason" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#22c55e" stopOpacity={0.8} />
+                          <stop offset="95%" stopColor="#22c55e" stopOpacity={0.1} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="m" />
+                      <YAxis />
+                      <Tooltip />
+                      <Area type="monotone" dataKey="v" stroke="#22c55e" fillOpacity={1} fill="url(#gradSeason)" />
+                    </AreaChart>
+                  </ResponsiveContainer>
                 </div>
               </CardContent>
             </Card>
@@ -190,11 +248,16 @@ export default function Analytics() {
               <CardDescription>Hourly visitor distribution throughout the day</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-48 bg-muted/30 rounded-lg flex items-center justify-center border-2 border-dashed border-border">
-                <div className="text-center">
-                  <Clock className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">Hourly visitor distribution chart</p>
-                </div>
+              <div className="h-48">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={hourlyData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="h" minTickGap={8} />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="v" fill="#3b82f6" radius={[4,4,0,0]} />
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
             </CardContent>
           </Card>
@@ -228,8 +291,16 @@ export default function Analytics() {
                 <CardDescription>Wait times and throughput over time</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-64 bg-muted/30 rounded-lg flex items-center justify-center border-2 border-dashed border-border">
-                  <BarChart3 className="w-12 h-12 text-muted-foreground mx-auto" />
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={queuePerfData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="t" />
+                      <YAxis />
+                      <Tooltip />
+                      <Line type="monotone" dataKey="v" stroke="#8b5cf6" strokeWidth={2} dot={false} />
+                    </LineChart>
+                  </ResponsiveContainer>
                 </div>
               </CardContent>
             </Card>
@@ -240,8 +311,16 @@ export default function Analytics() {
                 <CardDescription>Queue abandonment patterns and reasons</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-64 bg-muted/30 rounded-lg flex items-center justify-center border-2 border-dashed border-border">
-                  <Users className="w-12 h-12 text-muted-foreground mx-auto" />
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={dropOffData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="stage" />
+                      <YAxis />
+                      <Tooltip />
+                      <Bar dataKey="v" fill="#ef4444" radius={[4,4,0,0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
                 </div>
               </CardContent>
             </Card>
@@ -278,9 +357,22 @@ export default function Analytics() {
                 <CardDescription>Monthly revenue growth patterns</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-64 bg-muted/30 rounded-lg flex items-center justify-center border-2 border-dashed border-border">
-                  <IndianRupee className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">Revenue trend analysis</p>
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={revenueTrend}>
+                      <defs>
+                        <linearGradient id="gradRev" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.8} />
+                          <stop offset="95%" stopColor="#f59e0b" stopOpacity={0.1} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="m" />
+                      <YAxis />
+                      <Tooltip />
+                      <Area type="monotone" dataKey="v" stroke="#f59e0b" fillOpacity={1} fill="url(#gradRev)" />
+                    </AreaChart>
+                  </ResponsiveContainer>
                 </div>
               </CardContent>
             </Card>
@@ -292,9 +384,16 @@ export default function Analytics() {
               <CardDescription>Offering patterns and donor behavior</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-48 bg-muted/30 rounded-lg flex items-center justify-center border-2 border-dashed border-border">
-                <IndianRupee className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">Donation trend and pattern analysis</p>
+              <div className="h-48">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={donationData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="src" />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="v" fill="#10b981" radius={[4,4,0,0]} />
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
             </CardContent>
           </Card>
