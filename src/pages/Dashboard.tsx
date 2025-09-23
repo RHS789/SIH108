@@ -103,7 +103,7 @@ export default function Dashboard() {
         />
         <div className="absolute inset-0 bg-gradient-to-r from-primary/70 to-primary/40 flex flex-col justify-center p-8">
           <h1 className="font-teko text-4xl font-bold text-primary-foreground mb-2">
-            Sacred Temple Dashboard
+            Temple Dashboard
           </h1>
           <p className="text-lg text-primary-foreground/90">
             Divine management for spiritual harmony

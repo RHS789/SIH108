@@ -61,12 +61,9 @@ export function TopNavLayout({ children }: TopNavLayoutProps) {
                 <Building className="w-6 h-6 text-primary-foreground" />
               </div>
               <div className="flex flex-col">
-                <h1 className="font-teko text-lg sm:text-xl font-bold text-primary leading-none">
-                  Sacred Temple Admin
+                <h1 className="font-teko text-lg sm:text-xl font-bold text-primary leading-none whitespace-nowrap">
+                  Temple Admin
                 </h1>
-                <p className="hidden sm:block text-xs text-muted-foreground leading-none">
-                  Divine Management Dashboard
-                </p>
               </div>
             </motion.div>
 
@@ -75,13 +72,13 @@ export function TopNavLayout({ children }: TopNavLayoutProps) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="hidden md:flex items-center gap-2 absolute left-1/2 transform -translate-x-1/2"
+              className="hidden md:flex flex-1 items-center justify-center gap-6"
             >
               {navigationItems.map((item) => (
                 <Link
                   key={item.title}
                   to={item.url}
-                  className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
                     isActive(item.url)
                       ? "bg-gradient-primary text-primary-foreground shadow-sacred"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted/50 hover:shadow-sacred hover:scale-105"
