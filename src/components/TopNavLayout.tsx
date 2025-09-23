@@ -61,7 +61,7 @@ export function TopNavLayout({ children }: TopNavLayoutProps) {
                 <Building className="w-6 h-6 text-primary-foreground" />
               </div>
               <div className="flex flex-col">
-                <h1 className="font-teko text-lg sm:text-xl font-bold text-primary leading-none">
+                <h1 className="font-teko text-lg sm:text-xl font-bold text-primary leading-none whitespace-nowrap">
                   Temple Admin
                 </h1>
               </div>
