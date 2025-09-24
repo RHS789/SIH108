@@ -475,18 +475,6 @@ export default function Analytics() {
               </CardContent>
             </Card>
 
-            <Card className="bg-card/80 backdrop-blur-sm border-border/50">
-              <CardHeader>
-                <CardTitle className="font-teko text-xl">Flow Patterns</CardTitle>
-                <CardDescription>Visitor movement and flow analysis</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="h-64 bg-muted/30 rounded-lg flex items-center justify-center border-2 border-dashed border-border">
-                  <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">Visitor flow patterns</p>
-                </div>
-              </CardContent>
-            </Card>
           </div>
         </TabsContent>
       </Tabs>
