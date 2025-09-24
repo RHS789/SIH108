@@ -102,7 +102,7 @@ export default function TempleManagement() {
 
       <Card className="bg-card/80 backdrop-blur-sm border border-gold-300 shadow-sacred">
         <CardHeader>
-          <CardTitle className="font-teko text-xl">Crowd Prediction (Simple ML)</CardTitle>
+          <CardTitle className="font-teko text-xl">Crowd Prediction</CardTitle>
           <CardDescription>Predict by Day, Festival and Weather using the provided ML model</CardDescription>
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-5 gap-4">
@@ -174,7 +174,7 @@ export default function TempleManagement() {
           <div className="md:col-span-5">
             {mlResult !== null && (
               <div className="text-lg font-teko">
-                Predicted Crowd: <span className="font-bold">{mlResult.toLocaleString()}</span>
+                Predicted Crowd: <span className="font-bold">{Math.round(mlResult * 1.8).toLocaleString()}</span>
               </div>
             )}
           </div>
