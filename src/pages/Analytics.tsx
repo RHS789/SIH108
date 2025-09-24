@@ -22,6 +22,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { useQuery } from "@tanstack/react-query";
 import { fetchCrowdForecast } from "@/lib/api";
@@ -54,6 +56,31 @@ export default function Analytics() {
     queryFn: ({ signal }) => fetchCrowdForecast(48, signal),
     staleTime: 30_000,
   });
+
+  const [scenarioWeather, setScenarioWeather] = useState<"sunny" | "cloudy" | "rainy" | "stormy">("sunny");
+  const [scenarioHoliday, setScenarioHoliday] = useState(false);
+  const [scenarioFestival, setScenarioFestival] = useState(false);
+
+  const scenarioForecast = useMemo(() => {
+    const out: { t: string; y: number }[] = [];
+    const start = new Date();
+    start.setMinutes(0, 0, 0);
+    for (let i = 1; i <= 48; i++) {
+      const ts = new Date(start.getTime() + i * 3600_000);
+      const h = ts.getHours();
+      const hourFactor = h < 5 ? 0.3 : h < 8 ? 0.7 : h < 11 ? 1.0 : h < 16 ? 0.6 : h < 20 ? 1.1 : 0.5;
+      const weekend = [0, 6].includes(ts.getDay()) ? 1 : 0;
+      const base = 2000;
+      const weekendBoost = 1200 * weekend;
+      const holidayBoost = scenarioHoliday ? 1700 : 0;
+      const festivalBoost = scenarioFestival ? 3500 : 0;
+      const hourEffect = 800 * hourFactor;
+      const weatherPenalty = scenarioWeather === "rainy" ? -600 : scenarioWeather === "stormy" ? -1200 : scenarioWeather === "cloudy" ? -100 : 0;
+      const y = Math.max(50, Math.round(base + weekendBoost + holidayBoost + festivalBoost + hourEffect + weatherPenalty));
+      out.push({ t: ts.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }), y });
+    }
+    return out;
+  }, [scenarioWeather, scenarioHoliday, scenarioFestival]);
 
   const seasonalData = useMemo(
     () =>
@@ -185,8 +212,8 @@ export default function Analytics() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card className="bg-card/80 backdrop-blur-sm border-border/50">
               <CardHeader>
-                <CardTitle className="font-teko text-xl">Daily Visitor Trends</CardTitle>
-                <CardDescription>Visitor patterns over time</CardDescription>
+                <CardTitle className="font-teko text-xl">Daily Visitor Trends (API)</CardTitle>
+                <CardDescription>Live forecast from backend model</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="h-64">
@@ -211,6 +238,48 @@ export default function Analytics() {
                       </div>
                     </div>
                   )}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-card/80 backdrop-blur-sm border-border/50">
+              <CardHeader>
+                <CardTitle className="font-teko text-xl">What-if Scenario Forecast</CardTitle>
+                <CardDescription>Adjust conditions and preview 48h forecast</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                  <div>
+                    <Label className="mb-1 block">Weather</Label>
+                    <Select value={scenarioWeather} onValueChange={(v) => setScenarioWeather(v as any)}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="sunny">Sunny</SelectItem>
+                        <SelectItem value="cloudy">Cloudy</SelectItem>
+                        <SelectItem value="rainy">Rainy</SelectItem>
+                        <SelectItem value="stormy">Stormy</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Checkbox id="holiday" checked={scenarioHoliday} onCheckedChange={(v) => setScenarioHoliday(Boolean(v))} />
+                    <Label htmlFor="holiday">Holiday</Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Checkbox id="festival" checked={scenarioFestival} onCheckedChange={(v) => setScenarioFestival(Boolean(v))} />
+                    <Label htmlFor="festival">Festival</Label>
+                  </div>
+                </div>
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={scenarioForecast}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="t" minTickGap={24} />
+                      <YAxis />
+                      <Tooltip />
+                      <Line type="monotone" dataKey="y" stroke="#eab308" strokeWidth={2} dot={false} />
+                    </LineChart>
+                  </ResponsiveContainer>
                 </div>
               </CardContent>
             </Card>
