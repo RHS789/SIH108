@@ -74,6 +74,12 @@ class ForecastPoint(BaseModel):
     predicted_pilgrims: int
 
 
+class SimplePredictRequest(BaseModel):
+    day: str
+    festival: str | None = "No"
+    weather: str
+
+
 @app.on_event("startup")
 async def _startup():
     global MODEL
