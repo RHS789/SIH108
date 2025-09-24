@@ -57,13 +57,15 @@ export function AppSidebar() {
     >
       <div className="p-4 border-b border-border/50">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-primary rounded-lg flex items-center justify-center sacred-glow">
-            <Building className="w-6 h-6 text-primary-foreground" />
-          </div>
+          <img
+            src="https://cdn.builder.io/api/v1/image/assets%2F47a089953082494f838dba34d2e2a7ab%2F2702435c005d439faec1b63d0268240f?format=webp&width=800"
+            alt="Teerth Bandhu Logo"
+            className="w-10 h-10 rounded-lg object-cover sacred-glow"
+          />
           {!collapsed && (
             <div className="flex flex-col">
               <h1 className="font-teko text-xl font-bold text-primary">
-                Temple Admin
+                Teerth Bandhu
               </h1>
               <p className="text-xs text-muted-foreground">Sacred Dashboard</p>
             </div>

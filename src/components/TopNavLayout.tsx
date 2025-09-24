@@ -57,12 +57,14 @@ export function TopNavLayout({ children }: TopNavLayoutProps) {
               transition={{ duration: 0.6 }}
               className="flex items-center gap-3 sm:gap-4"
             >
-              <div className="w-10 h-10 bg-gradient-primary rounded-lg flex items-center justify-center sacred-glow hover:scale-105 transition-transform duration-300">
-                <Building className="w-6 h-6 text-primary-foreground" />
-              </div>
+              <img
+                src="https://cdn.builder.io/api/v1/image/assets%2F47a089953082494f838dba34d2e2a7ab%2F2702435c005d439faec1b63d0268240f?format=webp&width=800"
+                alt="Teerth Bandhu Logo"
+                className="w-10 h-10 rounded-lg object-cover sacred-glow hover:scale-105 transition-transform duration-300"
+              />
               <div className="flex flex-col">
                 <h1 className="font-teko text-lg sm:text-xl font-bold text-primary leading-none whitespace-nowrap">
-                  Temple Admin
+                  Teerth Bandhu
                 </h1>
               </div>
             </motion.div>
