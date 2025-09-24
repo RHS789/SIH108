@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Line, BarChart, Bar, AreaChart, Area } from "recharts";
+import { fetchRealtimeMetrics, type RealtimeMetrics } from "@/lib/api";
 
 // Types
 type CrowdRow = {
@@ -58,6 +59,7 @@ export default function Analytics() {
   const [rows, setRows] = useState<CrowdRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [realtime, setRealtime] = useState<RealtimeMetrics | null>(null);
 
   // Load CSV from public folder
   useEffect(() => {
@@ -79,6 +81,24 @@ export default function Analytics() {
     return () => {
       cancelled = true;
     };
+  }, []);
+
+  // Realtime metrics (queue wait time etc.)
+  useEffect(() => {
+    let cancelled = false;
+    let timer: number | undefined;
+    const load = async () => {
+      try {
+        const res = await fetchRealtimeMetrics();
+        if (!cancelled) setRealtime(res);
+      } catch (_) {
+        // ignore, api.ts provides fallback
+      } finally {
+        if (!cancelled) timer = window.setTimeout(load, 10000);
+      }
+    };
+    load();
+    return () => { cancelled = true; if (timer) window.clearTimeout(timer); };
   }, []);
 
   // Period filtering
@@ -325,31 +345,77 @@ export default function Analytics() {
           </Card>
         </TabsContent>
 
-        {/* Queue Analytics Tab (kept as-is with placeholder metrics) */}
         <TabsContent value="queue" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {[
-              { metric: "Average Wait Time", value: "18 min", change: "-12%", trend: "down" },
-              { metric: "Queue Throughput", value: "247/hr", change: "+8%", trend: "up" },
-              { metric: "Drop-off Rate", value: "3.2%", change: "-15%", trend: "down" },
-              { metric: "Peak Hour Efficiency", value: "89%", change: "+5%", trend: "up" },
-            ].map((metric, index) => (
-              <Card key={index} className="bg-card/80 backdrop-blur-sm border-border/50">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <Clock className="w-8 h-8 text-primary" />
-                    <Badge variant={metric.trend === "up" ? "default" : "destructive" as any}>
-                      {metric.change}
-                    </Badge>
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold font-teko">{metric.value}</p>
-                    <p className="text-sm text-muted-foreground">{metric.metric}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          {(() => {
+            const last = rows[rows.length - 1];
+            const prev = rows[rows.length - 2];
+            const periodDays = new Set(filtered.map(r => r.date)).size || 1;
+            const sumFiltered = filtered.reduce((a, r) => a + r.total, 0);
+            const avgDaily = Math.round(sumFiltered / periodDays);
+            const from = (() => {
+              if (rows.length === 0) return null as null | { fromIso: string; toIso: string };
+              const lastDate = rows[rows.length - 1].date;
+              const lastDt = new Date(lastDate);
+              let fromDt = new Date(lastDt);
+              if (selectedPeriod === "day") fromDt.setDate(lastDt.getDate() - 1);
+              else if (selectedPeriod === "week") fromDt.setDate(lastDt.getDate() - 7);
+              else if (selectedPeriod === "month") fromDt.setMonth(lastDt.getMonth() - 1);
+              else if (selectedPeriod === "year") fromDt.setFullYear(lastDt.getFullYear() - 1);
+              return { fromIso: fromDt.toISOString().slice(0,10), toIso: lastDate };
+            })();
+            const prevRange = (() => {
+              if (!from) return { sum: 0 };
+              const start = new Date(from.fromIso);
+              const end = new Date(from.toIso);
+              const diffDays = Math.max(1, Math.round((end.getTime() - start.getTime())/86400000));
+              const prevEnd = new Date(start);
+              const prevStart = new Date(start);
+              prevStart.setDate(prevStart.getDate() - diffDays);
+              const a = prevStart.toISOString().slice(0,10);
+              const b = new Date(prevEnd.getTime() - 1).toISOString().slice(0,10);
+              const sum = rows.filter(r => r.date >= a && r.date <= b).reduce((s, r) => s + r.total, 0);
+              return { sum };
+            })();
+            const periodChangePct = prevRange.sum > 0 ? Math.round(((sumFiltered - prevRange.sum)/prevRange.sum)*100) : 0;
+            const dayChangePct = prev ? Math.round(((last.total - prev.total) / Math.max(1, prev.total)) * 100) : 0;
+            const waitMin = realtime?.queue_wait_time_min ?? Math.max(5, Math.round(12 + (avgDaily - 2000) / 400));
+            const throughputPerDay = avgDaily;
+            const dropOff = dayChangePct < 0 ? Math.abs(dayChangePct) : 0;
+            const eff = (() => {
+              if (realtime?.queue_wait_time_min != null) {
+                const e = Math.max(30, Math.min(99, Math.round(100 - realtime.queue_wait_time_min * 2)));
+                return e;
+              }
+              const maxInPeriod = filtered.reduce((m, r) => Math.max(m, r.total), 0) || 1;
+              return Math.max(30, Math.min(99, Math.round(((last?.total || 0) / maxInPeriod) * 100)));
+            })();
+            const cards = [
+              { metric: "Average Wait Time", value: `${waitMin} min`, change: `${dayChangePct}%`, trend: dayChangePct >= 0 ? "up" : "down" },
+              { metric: "Queue Throughput", value: `${throughputPerDay.toLocaleString()}/day`, change: `${periodChangePct}%`, trend: periodChangePct >= 0 ? "up" : "down" },
+              { metric: "Drop-off Rate", value: `${dropOff}%`, change: `${dayChangePct}%`, trend: dayChangePct <= 0 ? "up" : "down" },
+              { metric: "Peak Hour Efficiency", value: `${eff}%`, change: `${periodChangePct}%`, trend: periodChangePct >= 0 ? "up" : "down" },
+            ];
+            return (
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                {cards.map((metric, index) => (
+                  <Card key={index} className="bg-card/80 backdrop-blur-sm border-border/50">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <Clock className="w-8 h-8 text-primary" />
+                        <Badge variant={metric.trend === "up" ? "default" : "destructive" as any}>
+                          {metric.change}
+                        </Badge>
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold font-teko">{metric.value}</p>
+                        <p className="text-sm text-muted-foreground">{metric.metric}</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            );
+          })()}
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card className="bg-card/80 backdrop-blur-sm border-border/50">
