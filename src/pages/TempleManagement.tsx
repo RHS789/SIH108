@@ -100,6 +100,87 @@ export default function TempleManagement() {
         </Button>
       </div>
 
+      <Card className="bg-card/80 backdrop-blur-sm border border-gold-300 shadow-sacred">
+        <CardHeader>
+          <CardTitle className="font-teko text-xl">Crowd Prediction (Simple ML)</CardTitle>
+          <CardDescription>Predict by Day, Festival and Weather using the provided ML model</CardDescription>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          <div className="md:col-span-1">
+            <Label>Day</Label>
+            <Select value={mlDay} onValueChange={setMlDay}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select day" />
+              </SelectTrigger>
+              <SelectContent>
+                {[
+                  "Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday",
+                ].map((d) => (
+                  <SelectItem key={d} value={d}>{d}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="md:col-span-2">
+            <Label>Festival</Label>
+            <Select value={mlFestival ?? "No"} onValueChange={(v) => setMlFestival(v)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select festival" />
+              </SelectTrigger>
+              <SelectContent>
+                {["No","Diwali","Dussehra","Ugadi","Makar Sankranti","Ganesh Chaturthi","Holi"].map((f) => (
+                  <SelectItem key={f} value={f}>{f}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="md:col-span-1">
+            <Label>Weather</Label>
+            <Select value={mlWeather} onValueChange={setMlWeather}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select weather" />
+              </SelectTrigger>
+              <SelectContent>
+                {["Sunny","Cloudy","Rainy","Windy"].map((w) => (
+                  <SelectItem key={w} value={w}>{w}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="md:col-span-1 flex items-end">
+            <Button
+              className="w-full bg-gradient-to-r from-yellow-400 to-orange-400 text-white"
+              disabled={mlLoading}
+              onClick={async () => {
+                try {
+                  setMlLoading(true);
+                  setMlResult(null);
+                  const res = await predictSimpleCrowd({ day: mlDay, festival: mlFestival, weather: mlWeather });
+                  setMlResult(res.predicted_crowd);
+                } catch (e) {
+                  setMlResult(null);
+                } finally {
+                  setMlLoading(false);
+                }
+              }}
+            >
+              {mlLoading ? "Predicting..." : "Predict"}
+            </Button>
+          </div>
+
+          <div className="md:col-span-5">
+            {mlResult !== null && (
+              <div className="text-lg font-teko">
+                Predicted Crowd: <span className="font-bold">{mlResult.toLocaleString()}</span>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
       <Tabs defaultValue="temples" className="space-y-6">
         <TabsList className="grid w-full grid-cols-4 bg-card rounded-lg shadow-inner">
           <TabsTrigger value="temples">Temples</TabsTrigger>
