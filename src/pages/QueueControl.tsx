@@ -442,21 +442,6 @@ export default function QueueControl() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card className="bg-card/80 backdrop-blur-sm border-border/50">
               <CardHeader>
-                <CardTitle className="font-teko text-xl">Queue Flow Efficiency</CardTitle>
-                <CardDescription>Real-time throughput and efficiency metrics</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="h-64 bg-muted/30 rounded-lg flex items-center justify-center border-2 border-dashed border-border">
-                  <div className="text-center">
-                    <Activity className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground">Flow efficiency chart</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-card/80 backdrop-blur-sm border-border/50">
-              <CardHeader>
                 <CardTitle className="font-teko text-xl">Crowd Density Heatmap</CardTitle>
                 <CardDescription>Visual representation of queue congestion</CardDescription>
               </CardHeader>
