@@ -38,3 +38,17 @@ export async function predictCrowd(input: {
   if (!res.ok) throw new Error(`Failed to predict crowd: ${res.status}`);
   return res.json();
 }
+
+export async function predictSimpleCrowd(input: {
+  day: string;
+  festival?: string | null;
+  weather: string;
+}): Promise<{ predicted_crowd: number }> {
+  const res = await fetch("/api/predict_simple", {
+    method: "POST",
+    headers: JSON_HEADERS,
+    body: JSON.stringify(input),
+  });
+  if (!res.ok) throw new Error(`Failed to predict simple crowd: ${res.status}`);
+  return res.json();
+}
