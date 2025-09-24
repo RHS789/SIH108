@@ -7,6 +7,8 @@ import numpy as np
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, field_validator
 
+from legacy_model import predict_simple
+
 from train_model import load_model
 
 app = FastAPI(title="Temple Crowd Backend", version="1.0.0")
