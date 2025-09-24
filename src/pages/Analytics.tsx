@@ -221,11 +221,10 @@ export default function Analytics() {
       </div>
 
       <Tabs defaultValue="trends" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="trends">Visitor Trends</TabsTrigger>
           <TabsTrigger value="queue">Queue Analytics</TabsTrigger>
           <TabsTrigger value="revenue">Revenue Reports</TabsTrigger>
-          <TabsTrigger value="heatmaps">Crowd Heatmaps</TabsTrigger>
         </TabsList>
 
         {/* Visitor Trends */}
@@ -525,24 +524,6 @@ export default function Analytics() {
           </div>
         </TabsContent>
 
-        {/* Heatmaps (placeholder visuals) */}
-        <TabsContent value="heatmaps" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="bg-card/80 backdrop-blur-sm border-border/50">
-              <CardHeader>
-                <CardTitle className="font-teko text-xl">Temple Ground Heatmap</CardTitle>
-                <CardDescription>Real-time crowd density visualization</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="h-64 bg-muted/30 rounded-lg flex items-center justify-center border-2 border-dashed border-border">
-                  <MapPin className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">Live crowd density heatmap</p>
-                </div>
-              </CardContent>
-            </Card>
-
-          </div>
-        </TabsContent>
       </Tabs>
     </div>
   );
