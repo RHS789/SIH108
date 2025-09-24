@@ -5,6 +5,8 @@ from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.ensemble import RandomForestRegressor
+from xgboost import xgb
+from xgb import XGBRegressor
 from sklearn.metrics import r2_score
 
 DATA_CSV = os.path.join(os.path.dirname(__file__), "data", "crowd_timeseries.csv")
@@ -35,7 +37,7 @@ def train() -> str:
         ]
     )
 
-    model = RandomForestRegressor(n_estimators=200, random_state=42, n_jobs=-1)
+    model = XGBRegressor(n_estimators=200, random_state=42, n_jobs=-1)
 
     pipe = Pipeline(steps=[
         ("pre", pre),
