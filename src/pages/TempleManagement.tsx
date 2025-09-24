@@ -15,6 +15,12 @@ import { motion } from "framer-motion";
 export default function TempleManagement() {
   const [selectedTemple, setSelectedTemple] = useState<string | null>(null);
 
+  const [mlDay, setMlDay] = useState("Monday");
+  const [mlFestival, setMlFestival] = useState<string | null>("No");
+  const [mlWeather, setMlWeather] = useState("Sunny");
+  const [mlResult, setMlResult] = useState<number | null>(null);
+  const [mlLoading, setMlLoading] = useState(false);
+
   const temples = [
     {
       id: 1,
