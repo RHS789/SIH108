@@ -149,6 +149,15 @@ async def forecast(hours: int = 48):
     return out
 
 
+@app.post("/api/predict_simple")
+async def predict_simple_api(req: SimplePredictRequest):
+    try:
+        val = predict_simple(req.day, req.festival, req.weather)
+        return {"predicted_crowd": int(val)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"prediction failed: {e}")
+
+
 if __name__ == "__main__":
     import uvicorn
 
