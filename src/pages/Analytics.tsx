@@ -244,6 +244,48 @@ export default function Analytics() {
 
             <Card className="bg-card/80 backdrop-blur-sm border-border/50">
               <CardHeader>
+                <CardTitle className="font-teko text-xl">What-if Scenario Forecast</CardTitle>
+                <CardDescription>Adjust conditions and preview 48h forecast</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                  <div>
+                    <Label className="mb-1 block">Weather</Label>
+                    <Select value={scenarioWeather} onValueChange={(v) => setScenarioWeather(v as any)}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="sunny">Sunny</SelectItem>
+                        <SelectItem value="cloudy">Cloudy</SelectItem>
+                        <SelectItem value="rainy">Rainy</SelectItem>
+                        <SelectItem value="stormy">Stormy</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Checkbox id="holiday" checked={scenarioHoliday} onCheckedChange={(v) => setScenarioHoliday(Boolean(v))} />
+                    <Label htmlFor="holiday">Holiday</Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Checkbox id="festival" checked={scenarioFestival} onCheckedChange={(v) => setScenarioFestival(Boolean(v))} />
+                    <Label htmlFor="festival">Festival</Label>
+                  </div>
+                </div>
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={scenarioForecast}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="t" minTickGap={24} />
+                      <YAxis />
+                      <Tooltip />
+                      <Line type="monotone" dataKey="y" stroke="#eab308" strokeWidth={2} dot={false} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-card/80 backdrop-blur-sm border-border/50">
+              <CardHeader>
                 <CardTitle className="font-teko text-xl">Seasonal Analysis</CardTitle>
                 <CardDescription>Festival and seasonal visitor patterns</CardDescription>
               </CardHeader>
